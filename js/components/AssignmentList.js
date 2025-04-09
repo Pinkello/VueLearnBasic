@@ -1,24 +1,27 @@
 import Assignment from "./Assignment.js";
+import AssignmentTags from "./AssignmentTags.js";
+import Panel from "./Panel.js";
 
 export default {
-  components: { Assignment },
+  components: { Assignment, AssignmentTags, Panel },
   /* html */
   template: `
-      <section v-show="assignments.length">
-        <h2 class="font-bold mb-2">{{title}}
-            <span>({{assignments.length}})</span>
-        </h2>
+      <Panel v-show="assignments.length" class="w-60">
+        <div class="flex justify-between items-start">
+          <h2 class="font-bold mb-2">{{title}}
+              <span>({{assignments.length}})</span>
+          </h2>
 
-        <div class="flex gap-2 ">
-            <button 
-                @click="currentTag = tag"
-                v-for="tag in tags" 
-                class="border rounded px-1 py-px text-xs"
-                :class="{ 'border-blue-500 text-blue-500' : tag === currentTag }"
-            >
-                {{tag}}
-            </button>
+          <button v-show="canToggle" @click="$emit('toggle')">&times</button>
         </div>
+
+        <assignment-tags 
+          v-model:currentTag="currentTag"
+          :initialTags="assignments.map(a=> a.tag)"
+          >
+        
+        </assignment-tags>
+
         <ul class="border border-gray-600 divide-y divide-gray-600 mt-6">
             <assignment  
                 v-for="assignment in filteredAssignments" 
@@ -26,7 +29,11 @@ export default {
                 :assignment="assignment">
             </assignment>
         </ul>
-    </section>
+
+        <slot></slot>
+
+        <template #footer>my goot</template>
+    </Panel>
     `,
 
   data() {
@@ -38,6 +45,10 @@ export default {
   props: {
     assignments: Array,
     title: String,
+    canToggle: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   computed: {
@@ -46,10 +57,6 @@ export default {
         return this.assignments;
       }
       return this.assignments.filter((a) => a.tag === this.currentTag);
-    },
-
-    tags() {
-      return ["all", ...new Set(this.assignments.map((a) => a.tag))];
     },
   },
 };
